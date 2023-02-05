@@ -6,7 +6,7 @@ import { StyledButton } from "./StyledButton";
 import { useDispatch, useSelector } from "react-redux";
 import { setExpand } from "../store/features/expand/expand-slice";
 import { useUsers } from "../store/features/getUsers/use-users";
-
+import { Loader } from "./Loader";
 
 export const Users = () => {
   const [users, { error, status }] = useUsers();
@@ -20,14 +20,12 @@ export const Users = () => {
   const showMore = () => {
     if (numberOfitemsShown + 6 <= users.length) {
       setNumberOfItemsToShown(numberOfitemsShown + 6);
-      
     } else {
       setNumberOfItemsToShown(users.length);
       dispatch(setExpand(false));
-      
     }
-  }
-  
+  };
+
   return (
     <Box sx={{ mb: "140px" }} align="center">
       <Typography
@@ -40,7 +38,7 @@ export const Users = () => {
         Working with GET request
       </Typography>
       {error && <Typography>{error.message}</Typography>}
-      {status === "loading" && <Typography>Loading</Typography>}
+      {status === "loading" && <Loader />}
       {status === "received" && (
         <Grid container spacing="29" align="center" sx={{ mb: "50px" }}>
           {users.slice(0, numberOfitemsShown).map((user) => (
@@ -51,16 +49,13 @@ export const Users = () => {
         </Grid>
       )}
 
-      {isExpand ? (
-        <StyledButton
-          title="Show more"
-          onClick={() => {
-            showMore();
-          }}
-        />
-      ) : (
-        <StyledButton title="No more users" disabled />
-      )}
+      <StyledButton
+        title={isExpand ? "Show more" : "No more users"}
+        disabled={isExpand ? false : true}
+        onClick={() => {
+          showMore();
+        }}
+      />
     </Box>
   );
 };
