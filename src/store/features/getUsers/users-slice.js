@@ -2,8 +2,8 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const loadUsers = createAsyncThunk(
   "@@users/load-users",
-  (api, { extra: { client} }) => {
-    return client.get(api);
+  (_, { extra: {client, api} }) => {
+    return client.get(api.ALL_USERS);
   }
 );
 
