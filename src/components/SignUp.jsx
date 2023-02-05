@@ -13,12 +13,10 @@ import { StyledButton } from "./StyledButton";
 import successImage from "../assets/success-image.svg";
 //import avatarDefault from "../assets/photo-cover.svg";
 
-
-
 import { useState } from "react";
 
-
 import { useForm } from "react-hook-form";
+import { usePositions } from "../store/features/getPositions/use-positions";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -33,9 +31,29 @@ export const SignUp = () => {
     mode: "onBlur",
   });
   
+  const [position, setPosition] = useState(null);
   const [succesRegistered, setSuccesRegistered] = useState(false);
+
+  const [positions, { error, status }] = usePositions();
   
-  const onSubmit = () => {reset()}
+  const onSubmit = (data) => {
+    console.log(data);
+    //const {name, email, phone, category} = data
+    reset();
+  };
+  const positionChange = (event) => {
+    setPosition(event.target.value);
+  };
+
+
+
+
+
+
+
+  
+
+  
 
   return (
     <Box
@@ -136,23 +154,15 @@ export const SignUp = () => {
             <Box>
               <FormControl sx={{ mt: "43px", mb: "47px", width: "100%" }}>
                 <FormLabel>Select your position</FormLabel>
-                <RadioGroup >
-                  <FormControlLabel
-                    value="Frontend developer"
-                    control={<Radio />}
-                    label="Frontend developer"
-                  />
-                  <FormControlLabel
-                    value="Backend developer"
-                    control={<Radio />}
-                    label="Backend developer"
-                  />
-                  <FormControlLabel
-                    value="Designer"
-                    control={<Radio />}
-                    label="Designer"
-                  />
-                  <FormControlLabel value="QA" control={<Radio />} label="QA" />
+                <RadioGroup value={position} onChange={positionChange}>
+                  {positions.map((position) => (
+                    <FormControlLabel
+                      key={position.id}
+                      value={position.name}
+                      control={<Radio />}
+                      label={position.name}
+                    />
+                  ))}
                 </RadioGroup>
               </FormControl>
               <Box
@@ -171,11 +181,7 @@ export const SignUp = () => {
                   disabled={errors?.avatar || watch("avatar") ? true : false}
                 >
                   Upload
-                  <input
-                    hidden
-                    accept="image/*"
-                    type="file"
-                  />
+                  <input hidden accept="image/*" type="file" />
                 </Button>
                 <TextField
                   label="Upload your photo"
@@ -194,7 +200,7 @@ export const SignUp = () => {
               </Box>
             </Box>
 
-            <StyledButton type="submit" title="Sign up" disabled={!isValid} />
+            <StyledButton type="submit" title="Sign up" disabled={(!(isValid && position !== null))} />
           </Box>
         </Box>
       )}
