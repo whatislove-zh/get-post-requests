@@ -14,7 +14,6 @@ export const Users = () => {
   const [numberOfitemsShown, setNumberOfItemsToShown] = useState(6);
 
   const dispatch = useDispatch();
-
   const isExpand = useSelector((state) => state.expand);
 
   const showMore = () => {

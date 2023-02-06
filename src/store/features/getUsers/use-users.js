@@ -15,5 +15,5 @@ export const useUsers = () => {
     }
   }, [qty, dispatch]);
 
-  return [users, {status, error, qty}]
+  return [users, { status, error, qty }];
 };

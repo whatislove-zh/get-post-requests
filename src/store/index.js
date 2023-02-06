@@ -7,13 +7,14 @@ import { positionsReduser } from "./features/getPositions/positions-slice";
 import { usersReducer } from "./features/getUsers/users-slice";
 
 export const store = configureStore({
-    reducer: {
-      expand: expandReduser,
-      users: usersReducer,
-      positions: positionsReduser,
-    },
-    devTools: true,
-    middleware: (getDefaultMiddlware) => getDefaultMiddlware({
+  reducer: {
+    expand: expandReduser,
+    users: usersReducer,
+    positions: positionsReduser,
+  },
+  devTools: true,
+  middleware: (getDefaultMiddlware) =>
+    getDefaultMiddlware({
       thunk: {
         extraArgument: {
           client: axios,
@@ -21,5 +22,5 @@ export const store = configureStore({
         },
       },
       serializableCheck: false,
-    })
-  });
+    }),
+});

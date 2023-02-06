@@ -3,8 +3,6 @@ import { Box } from "@mui/system";
 import logo from "../assets/Logo.svg";
 import { StyledButton } from "./StyledButton";
 
-import React from "react";
-
 export const Header = () => {
   return (
     <Box>

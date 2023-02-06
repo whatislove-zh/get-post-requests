@@ -8,21 +8,16 @@ import {
   Radio,
   FormControlLabel,
   Button,
-  Alert
-  
+  Alert,
 } from "@mui/material";
 import { StyledButton } from "./StyledButton";
 import successImage from "../assets/success-image.svg";
-
 import { useEffect, useState } from "react";
-
 import { useForm } from "react-hook-form";
 import { usePositions } from "../store/features/getPositions/use-positions";
-
 import { useDispatch } from "react-redux";
 import { loadUsers } from "../store/features/getUsers/users-slice";
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+import { POST_USER, TOKEN } from "../store/config";
 
 export const SignUp = () => {
   const {
@@ -34,7 +29,7 @@ export const SignUp = () => {
   } = useForm({
     mode: "onBlur",
   });
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const [position, setPosition] = useState(null);
   const [file, setFile] = useState(null);
@@ -43,10 +38,10 @@ export const SignUp = () => {
 
   useEffect(() => {
     if (isRegisterSuccessInfo?.success) {
-      reset()
-      dispatch(loadUsers())
+      reset();
+      dispatch(loadUsers());
     }
-  }, [isRegisterSuccessInfo, reset, dispatch])
+  }, [isRegisterSuccessInfo, reset, dispatch]);
 
   const [positions] = usePositions();
 
@@ -58,9 +53,7 @@ export const SignUp = () => {
     formData.append("phone", phone);
     formData.append("email", email);
     formData.append("position_id", position);
-    await postUser(formData)
-    
-    
+    await postUser(formData);
   };
   const positionChange = (event) => {
     setPosition(event.target.value);
@@ -68,9 +61,7 @@ export const SignUp = () => {
 
   const getToken = async () => {
     try {
-      const res = await fetch(
-        "https://frontend-test-assignment-api.abz.agency/api/v1/token"
-      );
+      const res = await fetch(TOKEN);
       const data = await res.json();
       setToken(data);
     } catch (err) {
@@ -86,10 +77,7 @@ export const SignUp = () => {
     };
 
     try {
-      const res = await fetch(
-        "https://frontend-test-assignment-api.abz.agency/api/v1/users",
-        requestOptions
-      );
+      const res = await fetch(POST_USER, requestOptions);
       const data = await res.json();
       setIsRegisterSuccessInfo(data);
       console.log("data: ", data);
@@ -249,8 +237,13 @@ export const SignUp = () => {
               title="Sign up"
               disabled={!(isValid && token !== null && position !== null)}
             />
-            {isRegisterSuccessInfo?.success === false ? <Alert sx={{mt:"25px"}} severity="error">{isRegisterSuccessInfo.message}</Alert> : ""}
-
+            {isRegisterSuccessInfo?.success === false ? (
+              <Alert sx={{ mt: "25px" }} severity="error">
+                {isRegisterSuccessInfo.message}
+              </Alert>
+            ) : (
+              ""
+            )}
           </Box>
         </Box>
       )}
