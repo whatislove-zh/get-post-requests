@@ -8,15 +8,19 @@ import {
   Radio,
   FormControlLabel,
   Button,
+  Alert
+  
 } from "@mui/material";
 import { StyledButton } from "./StyledButton";
 import successImage from "../assets/success-image.svg";
-//import avatarDefault from "../assets/photo-cover.svg";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useForm } from "react-hook-form";
 import { usePositions } from "../store/features/getPositions/use-positions";
+
+import { useDispatch } from "react-redux";
+import { loadUsers } from "../store/features/getUsers/users-slice";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,30 +34,69 @@ export const SignUp = () => {
   } = useForm({
     mode: "onBlur",
   });
-  
-  const [position, setPosition] = useState(null);
-  const [succesRegistered, setSuccesRegistered] = useState(false);
+  const dispatch = useDispatch()
 
-  const [positions, { error, status }] = usePositions();
-  
-  const onSubmit = (data) => {
-    console.log(data);
-    //const {name, email, phone, category} = data
-    reset();
+  const [position, setPosition] = useState(null);
+  const [file, setFile] = useState(null);
+  const [token, setToken] = useState(null);
+  const [isRegisterSuccessInfo, setIsRegisterSuccessInfo] = useState(false);
+
+  useEffect(() => {
+    if (isRegisterSuccessInfo?.success) {
+      reset()
+      dispatch(loadUsers())
+    }
+  }, [isRegisterSuccessInfo, reset, dispatch])
+
+  const [positions] = usePositions();
+
+  const onSubmit = async (data) => {
+    const { name, email, phone } = data;
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("photo", file);
+    formData.append("phone", phone);
+    formData.append("email", email);
+    formData.append("position_id", position);
+    await postUser(formData)
+    
+    
   };
   const positionChange = (event) => {
     setPosition(event.target.value);
   };
 
+  const getToken = async () => {
+    try {
+      const res = await fetch(
+        "https://frontend-test-assignment-api.abz.agency/api/v1/token"
+      );
+      const data = await res.json();
+      setToken(data);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
 
+  const postUser = async (formData) => {
+    const requestOptions = {
+      method: "POST",
+      body: formData,
+      headers: { Token: token.token },
+    };
 
-
-
-
-
-  
-
-  
+    try {
+      const res = await fetch(
+        "https://frontend-test-assignment-api.abz.agency/api/v1/users",
+        requestOptions
+      );
+      const data = await res.json();
+      setIsRegisterSuccessInfo(data);
+      console.log("data: ", data);
+    } catch (err) {
+      console.log("error: ", err.stack);
+    }
+  };
 
   return (
     <Box
@@ -64,7 +107,7 @@ export const SignUp = () => {
         alignItems: "center",
       }}
     >
-      {succesRegistered ? (
+      {isRegisterSuccessInfo?.success ? (
         <img
           src={successImage}
           height="650px"
@@ -74,7 +117,7 @@ export const SignUp = () => {
             animation: "2s linear 0.2s success-image",
           }}
           onAnimationEnd={(e) => {
-            setSuccesRegistered(false);
+            setIsRegisterSuccessInfo((prev) => ({ ...prev, success: false }));
           }}
         />
       ) : (
@@ -145,7 +188,8 @@ export const SignUp = () => {
                   message: "Enter a valid phone number",
                 },
                 pattern: {
-                  value: "+380677183545",
+                  value:
+                    /((\+38)?\(?\d{3}\)?[\s-]?(\d{7}|\d{3}[\s-]\d{2}[\s-]\d{2}|\d{3}-\d{4}))/g,
                   message: "Enter a valid phone number",
                 },
               })}
@@ -158,7 +202,7 @@ export const SignUp = () => {
                   {positions.map((position) => (
                     <FormControlLabel
                       key={position.id}
-                      value={position.name}
+                      value={position.id}
                       control={<Radio />}
                       label={position.name}
                     />
@@ -181,26 +225,32 @@ export const SignUp = () => {
                   disabled={errors?.avatar || watch("avatar") ? true : false}
                 >
                   Upload
-                  <input hidden accept="image/*" type="file" />
+                  <input
+                    hidden
+                    accept=".jpg, .jpeg"
+                    type="file"
+                    onChange={(e) => {
+                      setFile(e.target.files[0]);
+                      getToken();
+                    }}
+                  />
                 </Button>
                 <TextField
+                  helperText={file !== null ? "" : "File is required"}
                   label="Upload your photo"
                   fullWidth
-                  helperText={errors?.avatar ? errors.avatar.message : ""}
-                  error={errors?.avatar ? true : false}
                   margin="none"
-                  {...register("avatar", {
-                    pattern: {
-                      value:
-                        /[(http(s)?):(www)?a-zA-Z0-9@:%._~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_.~#?&//=]*)/gi,
-                      message: "Enter a valid URL",
-                    },
-                  })}
                 />
               </Box>
             </Box>
 
-            <StyledButton type="submit" title="Sign up" disabled={(!(isValid && position !== null))} />
+            <StyledButton
+              type="submit"
+              title="Sign up"
+              disabled={!(isValid && token !== null && position !== null)}
+            />
+            {isRegisterSuccessInfo?.success === false ? <Alert sx={{mt:"25px"}} severity="error">{isRegisterSuccessInfo.message}</Alert> : ""}
+
           </Box>
         </Box>
       )}
